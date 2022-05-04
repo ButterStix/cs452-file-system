@@ -325,6 +325,8 @@ You can follow these steps to implement *create*():
     inode = audi_new_inode(dir, mode);
 ```
 
+**Note**: the *struct inode* has a field called *unsigned long i_ino*, that is the inode number. You will need this inode number in this right next step.
+
 4. insert the dentry representing the new file/directory into the end of the parent directory's dentry table.
 5. call *mark_inode_dirty*() to mark this inode as dirty so that the kernel will put the inode on the superblock's dirty list and write it into the disk. this function, defined in the kernel (in include/linux/fs.h), has the following prototype:
 
@@ -371,7 +373,7 @@ If the chosen file exists in the parent directory, the *lookup*() function is ex
 
 You can follow these steps to implement *lookup*():
 
-1. if the chosen file's filename length is larger than AUDI_FILENAME_LEN, return -ENAMETOOLONG;
+1. if the chosen file's filename length is larger than AUDI_FILENAME_LEN, return ERR_PTR(-ENAMETOOLONG); **Note**: *lookup*() is expected to return a pointer, thus when returning an error code, we need to use *ERR_PTR*() to wrap the error code; in *create*(), *unlink*(), *rmdir*(), *mkdir*(), because they are expected to return an integer, we do not need to use *ERR_PTR*() wrap the error code.
 2. search the *dentry* in the parent directory's dentry table. if found, call *audi_iget*() which returns the corresponding inode. *audi_iget*() has the following prototype:
 
 ```c
